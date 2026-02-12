@@ -112,6 +112,19 @@ class HistoryDatabase:
         self.db_path = Path(db_path) if db_path else DEFAULT_DB_PATH
         self._conn: duckdb.DuckDBPyConnection | None = None
 
+    @staticmethod
+    def _is_closed_connection_error(exc: Exception) -> bool:
+        text = str(exc).lower()
+        return "connection already closed" in text or ("connection error" in text and "closed" in text)
+
+    def _open_connection(self) -> duckdb.DuckDBPyConnection:
+        """Open a fresh connection and ensure schema is available."""
+        self._ensure_dir()
+        self._conn = duckdb.connect(str(self.db_path))
+        self._init_schema()
+        logger.info("[HistoryDB] Connected to %s", self.db_path)
+        return self._conn
+
     def _ensure_dir(self) -> None:
         """Ensure the database directory exists."""
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -119,17 +132,26 @@ class HistoryDatabase:
     def connect(self) -> duckdb.DuckDBPyConnection:
         """Get or create database connection."""
         if self._conn is None:
-            self._ensure_dir()
-            self._conn = duckdb.connect(str(self.db_path))
-            self._init_schema()
-            logger.info("[HistoryDB] Connected to %s", self.db_path)
+            return self._open_connection()
+        try:
+            self._conn.execute("SELECT 1")
+        except Exception as exc:
+            if not self._is_closed_connection_error(exc):
+                raise
+            logger.warning("[HistoryDB] Reopening closed connection to %s", self.db_path)
+            self._conn = None
+            return self._open_connection()
         return self._conn
 
     def close(self) -> None:
         """Close the database connection."""
         if self._conn is not None:
-            self._conn.close()
-            self._conn = None
+            try:
+                self._conn.close()
+            except Exception as exc:
+                logger.warning("[HistoryDB] Ignoring close error: %s", exc)
+            finally:
+                self._conn = None
 
     def _init_schema(self) -> None:
         """Initialize database schema."""

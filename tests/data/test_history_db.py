@@ -257,6 +257,18 @@ class TestHistoryDatabase:
         assert status.total_records == 0
         assert status.imported_dumps == []
 
+    def test_connect_reopens_stale_closed_connection(self, db):
+        """Test connect() reopens when underlying connection was externally closed."""
+        first = db.connect()
+        first.close()  # Simulate external/other-thread close without clearing db._conn
+
+        second = db.connect()
+        assert second is not first
+
+        probe = second.execute("SELECT 1").fetchone()
+        assert probe is not None
+        assert probe[0] == 1
+
 
 class TestMonthCoverage:
     """Tests for MonthCoverage dataclass."""

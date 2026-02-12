@@ -381,10 +381,6 @@ class DumpManager:
                     message=f"Database update failed: {error_msg}",
                 )
             finally:
-                try:
-                    self.db.close()
-                except Exception:
-                    pass
                 self._update_lock.release()
 
         self._background_thread = threading.Thread(
