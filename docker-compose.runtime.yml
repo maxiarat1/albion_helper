@@ -1,0 +1,73 @@
+services:
+  backend:
+    image: ${ALBION_HELPER_BACKEND_IMAGE:-ghcr.io/your-org/albion-helper-backend:latest}
+    command: ["uvicorn", "app.web.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3}
+      OLLAMA_TIMEOUT_S: ${OLLAMA_TIMEOUT_S:-120}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
+      OPENAI_TIMEOUT_S: ${OPENAI_TIMEOUT_S:-30}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_BASE_URL: ${ANTHROPIC_BASE_URL:-https://api.anthropic.com}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-}
+      ANTHROPIC_VERSION: ${ANTHROPIC_VERSION:-2023-06-01}
+      ANTHROPIC_TIMEOUT_S: ${ANTHROPIC_TIMEOUT_S:-30}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_BASE_URL: ${GEMINI_BASE_URL:-https://generativelanguage.googleapis.com}
+      GEMINI_MODEL: ${GEMINI_MODEL:-}
+      GEMINI_TIMEOUT_S: ${GEMINI_TIMEOUT_S:-30}
+      LANGFUSE_ENABLED: ${LANGFUSE_ENABLED:-}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-}
+      LANGFUSE_BASE_URL: ${LANGFUSE_BASE_URL:-https://cloud.langfuse.com}
+      LANGFUSE_TRACING_ENVIRONMENT: ${LANGFUSE_TRACING_ENVIRONMENT:-}
+      LANGFUSE_ENV: ${LANGFUSE_ENV:-}
+      LANGFUSE_RELEASE: ${LANGFUSE_RELEASE:-}
+      AODP_BASE_URL: ${AODP_BASE_URL:-https://www.albion-online-data.com}
+      AODP_TIMEOUT_S: ${AODP_TIMEOUT_S:-15}
+      AODP_CACHE_TTL_S: ${AODP_CACHE_TTL_S:-60}
+      AODP_FRESHNESS_TTL_S: ${AODP_FRESHNESS_TTL_S:-900}
+      ITEM_CATALOG_PATH: ${ITEM_CATALOG_PATH:-}
+      MARKET_HISTORY_DB: /app/data/history/market.duckdb
+      DUMP_DOWNLOAD_DIR: /app/data/dumps
+      AODP_DUMP_INDEX_URL: ${AODP_DUMP_INDEX_URL:-https://www.albion-online-data.com/database-europe/}
+      GAME_DATA_DIR: /app/data/gamedata
+    volumes:
+      - market_history:/app/data/history
+      - market_dumps:/app/data/dumps
+      - game_data:/app/data/gamedata
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  frontend:
+    image: ${ALBION_HELPER_FRONTEND_IMAGE:-ghcr.io/your-org/albion-helper-frontend:latest}
+    command: sh -c "npm run build && npm run preview -- --host 0.0.0.0 --port 5173"
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_BASE: ${VITE_API_BASE:-http://localhost:8000}
+
+  albiondata-client:
+    image: ${ALBIONDATA_CLIENT_IMAGE:-ghcr.io/your-org/albion-helper-albiondata-client:latest}
+    network_mode: host
+    cap_add:
+      - NET_RAW
+    volumes:
+      - albiondata_client:/data
+    restart: unless-stopped
+
+volumes:
+  market_history:
+  market_dumps:
+  game_data:
+  albiondata_client:
