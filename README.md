@@ -6,7 +6,7 @@ Self-hosted Albion Online assistant with chat, live market data, and historical 
 
 Requirements:
 - Docker with `docker compose`
-- Ollama
+- Ollama only if you want local Ollama models (optional)
 
 Run:
 
@@ -34,6 +34,9 @@ docker compose --env-file ~/.albion-helper/.env -f ~/.albion-helper/docker-compo
 
 # update to latest images
 curl -fsSL https://raw.githubusercontent.com/maxiarat1/albion_helper/master/scripts/install-runtime.sh | bash
+
+# delete everything (containers, volumes, ~/.albion-helper)
+curl -fsSL https://raw.githubusercontent.com/maxiarat1/albion_helper/master/scripts/uninstall-runtime.sh | bash
 ```
 
 Optional packet capture service:

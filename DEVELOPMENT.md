@@ -86,3 +86,9 @@ Normal users should use the runtime installer (no repo checkout required):
 ```bash
 curl -fsSL https://raw.githubusercontent.com/maxiarat1/albion_helper/master/scripts/install-runtime.sh | bash
 ```
+
+Runtime removal command:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/maxiarat1/albion_helper/master/scripts/uninstall-runtime.sh | bash
+```

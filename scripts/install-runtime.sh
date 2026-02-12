@@ -6,7 +6,6 @@ REPO="${ALBION_HELPER_REPO:-maxiarat1/albion_helper}"
 REF="${ALBION_HELPER_REF:-master}"
 COMPOSE_FILE_NAME="docker-compose.yml"
 ENV_FILE_NAME=".env"
-SKIP_OLLAMA_PULL="false"
 ENABLE_CAPTURE_PROFILE="false"
 START_STACK="true"
 SCRIPT_DIR=""
@@ -23,7 +22,6 @@ Options:
   --dir PATH              Install directory (default: ~/.albion-helper)
   --repo OWNER/REPO       GitHub repo for runtime files (default: maxiarat1/albion_helper)
   --ref REF               Git ref (branch/tag/SHA) for runtime files (default: master)
-  --skip-ollama-pull      Do not run 'ollama pull <model>'
   --with-capture          Enable optional albiondata-client profile
   --no-start              Download files only; do not run docker compose
   -h, --help              Show this help
@@ -84,10 +82,6 @@ while [ "$#" -gt 0 ]; do
     --ref)
       REF="${2:-}"
       shift 2
-      ;;
-    --skip-ollama-pull)
-      SKIP_OLLAMA_PULL="true"
-      shift
       ;;
     --with-capture)
       ENABLE_CAPTURE_PROFILE="true"
@@ -153,15 +147,6 @@ else
   fi
 fi
 
-if [ "$SKIP_OLLAMA_PULL" != "true" ]; then
-  require_cmd ollama
-
-  OLLAMA_MODEL="$(env_value_or_default "$ENV_DEST" "OLLAMA_MODEL" "llama3")"
-
-  log "Ensuring Ollama model is available: ${OLLAMA_MODEL}"
-  ollama pull "$OLLAMA_MODEL"
-fi
-
 if [ "$START_STACK" != "true" ]; then
   log "Files downloaded. Start manually with:"
   printf '  docker compose --env-file %q -f %q up -d\n' "$ENV_DEST" "$COMPOSE_DEST"
@@ -188,3 +173,4 @@ printf '  API: http://localhost:%s/docs\n' "$API_PORT"
 log "Manage the stack with:"
 printf '  docker compose --env-file %q -f %q logs -f\n' "$ENV_DEST" "$COMPOSE_DEST"
 printf '  docker compose --env-file %q -f %q down\n' "$ENV_DEST" "$COMPOSE_DEST"
+printf '  curl -fsSL https://raw.githubusercontent.com/%s/%s/scripts/uninstall-runtime.sh | bash\n' "$REPO" "$REF"
