@@ -20,9 +20,9 @@ cp .env.example .env
 2. Set published image tags in `.env`:
 
 ```bash
-ALBION_HELPER_BACKEND_IMAGE=ghcr.io/your-org/albion-helper-backend:latest
-ALBION_HELPER_FRONTEND_IMAGE=ghcr.io/your-org/albion-helper-frontend:latest
-ALBIONDATA_CLIENT_IMAGE=ghcr.io/your-org/albion-helper-albiondata-client:latest
+ALBION_HELPER_BACKEND_IMAGE=ghcr.io/maxiarat1/albion-helper-backend:latest
+ALBION_HELPER_FRONTEND_IMAGE=ghcr.io/maxiarat1/albion-helper-frontend:latest
+ALBIONDATA_CLIENT_IMAGE=ghcr.io/maxiarat1/albion-helper-albiondata-client:latest
 ```
 
 3. Pick an LLM setup:
@@ -110,3 +110,14 @@ pytest
 # frontend tests
 cd frontend && npm test
 ```
+
+## Image Publishing (GitHub Actions)
+
+- Workflow file: `.github/workflows/publish-images.yml`
+- Trigger: push to `master`, tag pushes (`v*`), or manual run (`workflow_dispatch`)
+- Published image: `ghcr.io/maxiarat1/albion-helper-backend`
+- Published image: `ghcr.io/maxiarat1/albion-helper-frontend`
+- Published image: `ghcr.io/maxiarat1/albion-helper-albiondata-client`
+- Tag rule: `latest` on default branch builds
+- Tag rule: short commit SHA on branch/tag builds
+- Tag rule: pushed Git tag (for `v*`)

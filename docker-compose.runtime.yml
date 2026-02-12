@@ -1,6 +1,6 @@
 services:
   backend:
-    image: ${ALBION_HELPER_BACKEND_IMAGE:-ghcr.io/your-org/albion-helper-backend:latest}
+    image: ${ALBION_HELPER_BACKEND_IMAGE:-ghcr.io/maxiarat1/albion-helper-backend:latest}
     command: ["uvicorn", "app.web.main:app", "--host", "0.0.0.0", "--port", "8000"]
     restart: unless-stopped
     ports:
@@ -47,7 +47,7 @@ services:
       - "host.docker.internal:host-gateway"
 
   frontend:
-    image: ${ALBION_HELPER_FRONTEND_IMAGE:-ghcr.io/your-org/albion-helper-frontend:latest}
+    image: ${ALBION_HELPER_FRONTEND_IMAGE:-ghcr.io/maxiarat1/albion-helper-frontend:latest}
     command: sh -c "npm run build && npm run preview -- --host 0.0.0.0 --port 5173"
     restart: unless-stopped
     depends_on:
@@ -58,7 +58,7 @@ services:
       VITE_API_BASE: ${VITE_API_BASE:-http://localhost:8000}
 
   albiondata-client:
-    image: ${ALBIONDATA_CLIENT_IMAGE:-ghcr.io/your-org/albion-helper-albiondata-client:latest}
+    image: ${ALBIONDATA_CLIENT_IMAGE:-ghcr.io/maxiarat1/albion-helper-albiondata-client:latest}
     network_mode: host
     cap_add:
       - NET_RAW
