@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 DUMP_INDEX_URL = os.getenv(
     "AODP_DUMP_INDEX_URL",
     "https://www.albion-online-data.com/database-europe/"
-)
+) or "https://www.albion-online-data.com/database-europe/"
 
 # Download directory
 DOWNLOAD_DIR = Path(os.getenv("DUMP_DOWNLOAD_DIR", "data/dumps"))

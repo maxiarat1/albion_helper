@@ -37,7 +37,7 @@ services:
       ITEM_CATALOG_PATH: ${ITEM_CATALOG_PATH:-}
       MARKET_HISTORY_DB: /app/data/history/market.duckdb
       DUMP_DOWNLOAD_DIR: /app/data/dumps
-      AODP_DUMP_INDEX_URL: ${AODP_DUMP_INDEX_URL:-}
+      AODP_DUMP_INDEX_URL: ${AODP_DUMP_INDEX_URL:-https://www.albion-online-data.com/database-europe/}
       GAME_DATA_DIR: /app/data/gamedata
     volumes:
       - market_history:/app/data/history
