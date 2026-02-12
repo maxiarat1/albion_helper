@@ -1,7 +1,6 @@
 services:
   backend:
     image: ${ALBION_HELPER_BACKEND_IMAGE:-ghcr.io/maxiarat1/albion-helper-backend:latest}
-    command: ["uvicorn", "app.web.main:app", "--host", "0.0.0.0", "--port", "8000"]
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -30,14 +29,15 @@ services:
       LANGFUSE_TRACING_ENVIRONMENT: ${LANGFUSE_TRACING_ENVIRONMENT:-}
       LANGFUSE_ENV: ${LANGFUSE_ENV:-}
       LANGFUSE_RELEASE: ${LANGFUSE_RELEASE:-}
-      AODP_BASE_URL: ${AODP_BASE_URL:-https://www.albion-online-data.com}
+      AODP_REGION: ${AODP_REGION:-europe}
+      AODP_BASE_URL: ${AODP_BASE_URL:-}
       AODP_TIMEOUT_S: ${AODP_TIMEOUT_S:-15}
       AODP_CACHE_TTL_S: ${AODP_CACHE_TTL_S:-60}
       AODP_FRESHNESS_TTL_S: ${AODP_FRESHNESS_TTL_S:-900}
       ITEM_CATALOG_PATH: ${ITEM_CATALOG_PATH:-}
       MARKET_HISTORY_DB: /app/data/history/market.duckdb
       DUMP_DOWNLOAD_DIR: /app/data/dumps
-      AODP_DUMP_INDEX_URL: ${AODP_DUMP_INDEX_URL:-https://www.albion-online-data.com/database-europe/}
+      AODP_DUMP_INDEX_URL: ${AODP_DUMP_INDEX_URL:-}
       GAME_DATA_DIR: /app/data/gamedata
     volumes:
       - market_history:/app/data/history
@@ -48,17 +48,15 @@ services:
 
   frontend:
     image: ${ALBION_HELPER_FRONTEND_IMAGE:-ghcr.io/maxiarat1/albion-helper-frontend:latest}
-    command: sh -c "npm run build && npm run preview -- --host 0.0.0.0 --port 5173"
     restart: unless-stopped
     depends_on:
       - backend
     ports:
-      - "5173:5173"
-    environment:
-      VITE_API_BASE: ${VITE_API_BASE:-http://localhost:8000}
+      - "${ALBION_HELPER_UI_PORT:-5173}:5173"
 
   albiondata-client:
     image: ${ALBIONDATA_CLIENT_IMAGE:-ghcr.io/maxiarat1/albion-helper-albiondata-client:latest}
+    profiles: ["capture"]
     network_mode: host
     cap_add:
       - NET_RAW

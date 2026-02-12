@@ -1,123 +1,63 @@
 # Albion Helper
 
-Self-hosted Albion Online market assistant with chat, live prices, and historical charts.
+Self-hosted Albion Online assistant with chat, live market data, and historical price tools.
 
-## Prerequisites
+## One-Command Install (No Repo Needed)
 
-- Docker + Docker Compose
-- Python 3.11+
-- Node.js 20+
-- Optional: [Ollama](https://ollama.com/) for local LLM usage
+Requirements:
+- Docker with `docker compose`
+- Ollama
 
-## Runtime Quick Start (Prebuilt Docker Images)
-
-1. Create local env file:
+Run:
 
 ```bash
-cp .env.example .env
+curl -fsSL https://raw.githubusercontent.com/maxiarat1/albion_helper/master/scripts/install-runtime.sh | bash
 ```
 
-2. Set published image tags in `.env`:
-
-```bash
-ALBION_HELPER_BACKEND_IMAGE=ghcr.io/maxiarat1/albion-helper-backend:latest
-ALBION_HELPER_FRONTEND_IMAGE=ghcr.io/maxiarat1/albion-helper-frontend:latest
-ALBIONDATA_CLIENT_IMAGE=ghcr.io/maxiarat1/albion-helper-albiondata-client:latest
-```
-
-3. Pick an LLM setup:
-- Local model (default): install Ollama, then run `ollama pull llama3`
-- Cloud model: set one of `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `GEMINI_API_KEY` in `.env`
-
-4. Start the app from images only:
-
-```bash
-docker compose -f docker-compose.runtime.yml up -d
-```
-
-5. Open:
+Then open:
 - UI: http://localhost:5173
 - API docs: http://localhost:8000/docs
 
-### Optional: Enable Langfuse Tracing
+This installs runtime files into `~/.albion-helper` and starts prebuilt images from GHCR.
 
-Add these vars to `.env` (or keep defaults in `.env.example`):
+## Runtime Management
 
 ```bash
-LANGFUSE_ENABLED=false
-LANGFUSE_PUBLIC_KEY=pk-lf-...
-LANGFUSE_SECRET_KEY=sk-lf-...
-LANGFUSE_BASE_URL=https://cloud.langfuse.com
-LANGFUSE_TRACING_ENVIRONMENT=local
-LANGFUSE_RELEASE=
+# logs
+docker compose --env-file ~/.albion-helper/.env -f ~/.albion-helper/docker-compose.yml logs -f
+
+# stop
+docker compose --env-file ~/.albion-helper/.env -f ~/.albion-helper/docker-compose.yml down
+
+# start again
+docker compose --env-file ~/.albion-helper/.env -f ~/.albion-helper/docker-compose.yml up -d
+
+# update to latest images
+curl -fsSL https://raw.githubusercontent.com/maxiarat1/albion_helper/master/scripts/install-runtime.sh | bash
 ```
 
-Use `LANGFUSE_ENABLED=true|false` to force behavior. Leave it empty for auto mode (enabled only when keys exist).
+Optional packet capture service:
 
-## Development Setup (Source Code)
+```bash
+docker compose --env-file ~/.albion-helper/.env -f ~/.albion-helper/docker-compose.yml --profile capture up -d
+```
 
-Use this only if you want to work on the codebase locally.
+Runtime config file: `~/.albion-helper/.env`
+Template: `.env.runtime.example`
 
-### Docker-based development
+## Developer Setup (From Source)
+
+For contributors and debugging from this repository:
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
 
-### Local run without Docker
+Developer guide: `DEVELOPMENT.md`
 
-### 1) Backend
+## Runtime Images
 
-```bash
-cp .env.example .env
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt -r requirements-dev.txt
-set -a && source .env && set +a
-uvicorn app.web.main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-### 2) Frontend (new terminal)
-
-```bash
-cd frontend
-npm install
-npm run dev -- --host 0.0.0.0 --port 5173
-```
-
-Open http://localhost:5173.
-
-## First Use
-
-- In the UI, select provider + model.
-- `ollama` + `llama3` for local models
-- `openai` / `anthropic` / `gemini` for cloud models (enter API key in the UI if needed)
-- Optional: populate local historical data from the UI Data Manager (`Update DB` button)
-
-## Useful Commands
-
-```bash
-# stop containers
-docker compose down
-
-# stop runtime stack (image-only)
-docker compose -f docker-compose.runtime.yml down
-
-# backend tests
-pytest
-
-# frontend tests
-cd frontend && npm test
-```
-
-## Image Publishing (GitHub Actions)
-
-- Workflow file: `.github/workflows/publish-images.yml`
-- Trigger: push to `master`, tag pushes (`v*`), or manual run (`workflow_dispatch`)
-- Published image: `ghcr.io/maxiarat1/albion-helper-backend`
-- Published image: `ghcr.io/maxiarat1/albion-helper-frontend`
-- Published image: `ghcr.io/maxiarat1/albion-helper-albiondata-client`
-- Tag rule: `latest` on default branch builds
-- Tag rule: short commit SHA on branch/tag builds
-- Tag rule: pushed Git tag (for `v*`)
+- `ghcr.io/maxiarat1/albion-helper-backend`
+- `ghcr.io/maxiarat1/albion-helper-frontend`
+- `ghcr.io/maxiarat1/albion-helper-albiondata-client`
